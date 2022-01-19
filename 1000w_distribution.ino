@@ -1,5 +1,5 @@
 //Controller for 1000W Home distribution box
-//Sep 29, 2019
+//Jan. 18, 2022
 
 int freezerPin = 2;
 int lowerFridgePin = 3;
@@ -15,7 +15,7 @@ boolean mainFridgeModeFlag = false;
 #define delayTime 500         // delay time between output selections
 
 // Device timing
-#define dwellTime 1800000   // 30 minutes on each device (deployment)
+#define dwellTime 900000   // 15 minutes on each device (deployment)
 //#define dwellTime 60000       // 60 seconds on each device (for testing)
 //#define dwellTime 10000     // 10 seconds on each device (for testing)
 
