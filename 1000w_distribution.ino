@@ -1,108 +1,44 @@
-//Controller for 1000W Home distribution box
-//Jan. 18, 2022
+// Controller for 1000W Home distribution box
+// Sep 29, 2019
+
+// v. 2.0 Nov. 26, 2022
+// changed code from furnace mode to accessory mode:
+
+// Default is for power to be delivered to the top three outlets
+// Accessory mode allows for power to be delivered to the top 3 plus the lower Accessory outlet
+// Accessory outlet is only for device chargers or internet router
+// NOTE: When Accessory mode is enabled, press system reset button to return to default mode
 
 int freezerPin = 2;
 int lowerFridgePin = 3;
 int mainFridgePin = 4;
-int furnaceModePin = 5;
+int accessoryModePin = 5;
 int standardModeButtonPin = 6;
-int furnaceModeButtonPin = 7;
+int accessoryModeButtonPin = 7;
 long unsigned startTime, endTime;
-boolean standardMode, furnaceMode, standardModeFlag, furnaceModeFlag;
+boolean standardMode, accessoryMode, standardModeFlag, accessoryModeFlag;
 boolean freezerModeFlag = false;
 boolean lowerFridgeModeFlag = false;
 boolean mainFridgeModeFlag = false;
 #define delayTime 500         // delay time between output selections
 
 // Device timing
-#define dwellTime 900000   // 15 minutes on each device (deployment)
-//#define dwellTime 60000       // 60 seconds on each device (for testing)
-//#define dwellTime 10000     // 10 seconds on each device (for testing)
-
-// FUNCTIONS
-
-void standardModeFunction()
-{
-  // freezerMode
-  if (freezerModeFlag == true) {
-    furnaceModeFlag = false;
-    digitalWrite(furnaceModePin, LOW);  // first ensure that furnace is turned off
-    digitalWrite(freezerPin, HIGH);
-    
-    digitalWrite(lowerFridgePin, LOW);
-    digitalWrite(mainFridgePin, LOW);
-    unsigned long currTime = millis();
-    if (currTime > endTime) {
-      digitalWrite(freezerPin, LOW);
-      freezerModeFlag = false;
-      lowerFridgeModeFlag = true;
-      delay(delayTime);
-      startTime = millis();     // start clock running
-      endTime = startTime + dwellTime; // run
-    }
-    // lowerFridgeMode
-  } else if (lowerFridgeModeFlag == true) {
-    furnaceModeFlag = false;
-    digitalWrite(furnaceModePin, LOW);  // first ensure that furnace is turned off
-    digitalWrite(freezerPin, LOW);
-    
-    digitalWrite(lowerFridgePin, HIGH);
-    digitalWrite(mainFridgePin, LOW);
-    unsigned long currTime = millis();
-    if (currTime > endTime) {
-      digitalWrite(lowerFridgePin, LOW);
-      lowerFridgeModeFlag = false;
-      mainFridgeModeFlag = true;
-      delay(delayTime);
-      startTime = millis();     // start clock running
-      endTime = startTime + dwellTime; // run
-    }
-  } else {  // mainFridgeMode
-    furnaceModeFlag = false;
-    digitalWrite(furnaceModePin, LOW);  // first ensure that furnace is turned off
-    digitalWrite(freezerPin, LOW);
-    
-    digitalWrite(lowerFridgePin, LOW);
-    digitalWrite(mainFridgePin, HIGH);
-    unsigned long currTime = millis();
-    if (currTime > endTime) {
-      digitalWrite(mainFridgePin, LOW);
-      mainFridgeModeFlag = false;
-      freezerModeFlag = true;
-      delay(delayTime);
-      startTime = millis();     // start clock running
-      endTime = startTime + dwellTime; // run
-    }
-  }
-}
+#define dwellTime 1800000     // 30 minutes on each device (deployment)
+//#define dwellTime 60000     // 60 seconds on each device (for testing)
+//#define dwellTime 5000      // 5 seconds on each device (for testing)
 
 
-void furnaceModeFunction()
-{
-  //Serial.println("furnace mode");
-  digitalWrite(freezerPin, LOW);
-  digitalWrite(lowerFridgePin, LOW);
-  digitalWrite(mainFridgePin, LOW);
-  digitalWrite(furnaceModePin, HIGH);
-  unsigned long currTime = millis();
-  unsigned long timeLeft = endTime - currTime;
-  Serial.println(timeLeft);
-  if (currTime > endTime) {
-    digitalWrite(furnaceModePin, LOW);
-    furnaceModeFlag = false;
-  }
-}
 
 void setup() {
   Serial.begin(9600);
   pinMode(freezerPin, OUTPUT);
   pinMode(lowerFridgePin, OUTPUT);
   pinMode(mainFridgePin, OUTPUT);
-  pinMode(furnaceModePin, OUTPUT);
+  pinMode(accessoryModePin, OUTPUT);
   pinMode(standardModeButtonPin, OUTPUT);
   digitalWrite(standardModeButtonPin, HIGH);  // enable pullup
-  pinMode(furnaceModeButtonPin, OUTPUT);
-  digitalWrite(furnaceModeButtonPin, HIGH);   // enable pullup
+  pinMode(accessoryModeButtonPin, OUTPUT);
+  digitalWrite(accessoryModeButtonPin, HIGH);   // enable pullup
   digitalWrite(freezerPin, LOW);
   digitalWrite(lowerFridgePin, LOW);
   digitalWrite(mainFridgePin, LOW);
@@ -110,7 +46,7 @@ void setup() {
   // default to freezer mode
 
   standardModeFlag = true;
-  furnaceModeFlag = false;
+  accessoryModeFlag = false;
   startTime = millis();         // start clock running
   endTime = startTime + dwellTime;  // run
   standardModeFunction();
@@ -119,14 +55,13 @@ void setup() {
 void loop() {
   // test for button presses
   standardMode = digitalRead(standardModeButtonPin);
-  furnaceMode = digitalRead(furnaceModeButtonPin);
+  accessoryMode = digitalRead(accessoryModeButtonPin);
 
   
-
   if ((standardMode == LOW) && (millis() > (startTime + 500))) {    // revert to standard mode after one circuit in furnace mode
                                                                     // also debounce 500ms to prevent race condition
     standardModeFlag = true;
-    furnaceModeFlag = false;
+    accessoryModeFlag = false;
     startTime = millis();         // start clock running
     endTime = startTime + dwellTime;  // run
 
@@ -141,18 +76,19 @@ void loop() {
       mainFridgeModeFlag = false;
       freezerModeFlag = true;
     }
-  } else if (furnaceMode == LOW) {
+  } else if (accessoryMode == LOW) {
     delay(delayTime);
-    furnaceModeFlag = true;
+    accessoryModeFlag = true;
     standardModeFlag = false;
     startTime = millis();     // start clock running
     endTime = startTime + dwellTime; // run
   }
 
   // based on button presses, go to functions
-  if (furnaceModeFlag == true) {
-    furnaceModeFunction();
+  if (accessoryModeFlag == true) {
+    accessoryModeFunction();
   } else {
     standardModeFunction();
   }
 }
+
