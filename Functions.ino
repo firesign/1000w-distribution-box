@@ -2,9 +2,9 @@ void standardModeFunction()
 {
   // freezerMode
   if (freezerModeFlag == true) {
-    accessoryModeFlag = false;
+    //accessoryModeFlag = false;
 
-    digitalWrite(accessoryModePin, LOW);  // first ensure that accessory is turned off
+    //digitalWrite(accessoryModePin, LOW);  // first ensure that accessory is turned off
     digitalWrite(freezerPin, HIGH);
     
     digitalWrite(lowerFridgePin, LOW);
@@ -20,8 +20,8 @@ void standardModeFunction()
     }
     // lowerFridgeMode
   } else if (lowerFridgeModeFlag == true) {
-    accessoryModeFlag = false;
-    digitalWrite(accessoryModePin, LOW);  // first ensure that accessory is turned off
+    //accessoryModeFlag = false;
+    //digitalWrite(accessoryModePin, LOW);  // first ensure that accessory is turned off
     digitalWrite(freezerPin, LOW);
     
     digitalWrite(lowerFridgePin, HIGH);
@@ -36,8 +36,8 @@ void standardModeFunction()
       endTime = startTime + dwellTime; // run
     }
   } else {  // mainFridgeMode
-    accessoryModeFlag = false;
-    digitalWrite(accessoryModePin, LOW);  // first ensure that accessory is turned off
+    //accessoryModeFlag = false;
+    //digitalWrite(accessoryModePin, LOW);  // first ensure that accessory is turned off
     digitalWrite(freezerPin, LOW);
     
     digitalWrite(lowerFridgePin, LOW);
@@ -109,3 +109,5 @@ void accessoryModeFunction()
     }
   }
 }
+
+
